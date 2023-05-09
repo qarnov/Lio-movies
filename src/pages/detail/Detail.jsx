@@ -13,16 +13,32 @@ import MovieList from "../../components/movie-list/MovieList";
 const Detail = () => {
   const { category, id } = useParams();
   const [item, setItem] = useState(null);
+  const [director, setDirector] = useState(null);
 
   useEffect(() => {
     const getDetail = async () => {
       const response = await tmdbApi.detail(category, id, { params: {} });
+      //       fetch(`https://api.themoviedb.org/3/movie/${id}/credits?api_key=${process.env.REACT_APP_API_SECRET}`)
+      //             .then(response => response.json())
+      //             .then((jsonData)=>jsonData.crew.filter((job)=> job ==='Director')
+      // .then(e=>setDirector(e))).then(e=>setDirector(e))
+
+      fetch(
+        `https://api.themoviedb.org/3/movie/${id}/credits?api_key=${process.env.REACT_APP_API_SECRET}`
+      )
+        .then((response) => response.json())
+        .then((jsonData) =>
+          jsonData.crew.filter(({ job }) => job === "Director")
+        )
+        .then((e) => setDirector(e[0]));
       setItem(response);
       window.scrollTo(0, 0);
     };
     getDetail();
   }, [category, id]);
+  console.log(item);
 
+  // const URL = `https://api.themoviedb.org/3${director?.profile_path}`
   return (
     <>
       {item && (
@@ -47,7 +63,10 @@ const Detail = () => {
               ></div>
             </div>
             <div className="movie-content__info">
-              <div className="title">{item.title || item.name}</div>
+              <div className="title">
+                {item.title + " (" + item.release_date.slice(0, 4) + ")" ||
+                  item.name + " (" + item.release_date.slice(0, 4) + ")"}
+              </div>
               <div className="genres">
                 {item.genres &&
                   item.genres.slice(0, 5).map((genre, i) => (
@@ -57,6 +76,8 @@ const Detail = () => {
                   ))}
               </div>
               <p className="overview">{item.overview}</p>
+              <h2>Director : {director?.name}</h2>
+              {/* <img src={URL} alt="" /> */}
               <div className="cast">
                 <div className="section__header">
                   <h2>Casts</h2>
